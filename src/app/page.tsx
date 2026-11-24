@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 export default function Home() {
-  const { algorithm, setAlgorithm, quantum, setQuantum, run } = useSimulationStore();
+  const { algorithm, setAlgorithm, quantum, setQuantum, run, speed, setSpeed } = useSimulationStore();
   const playback = usePlayback();
   const [showComparison, setShowComparison] = useState(false);
   const [isDark, setIsDark] = useState(true);
@@ -33,7 +33,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Compact top nav */}
       <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="flex h-12 items-center justify-between px-4">
           <div className="flex items-center gap-2">
@@ -55,7 +54,6 @@ export default function Home() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-0">
-        {/* Left panel */}
         <aside className="border-r border-border bg-muted/20 p-4 space-y-5">
           <ProcessEditor />
 
@@ -102,13 +100,11 @@ export default function Home() {
           </Button>
         </aside>
 
-        {/* Main workspace */}
         <main className="flex flex-col min-h-[calc(100vh-3rem)]">
           <div className="flex-1 p-4 space-y-4">
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Timeline</div>
             <GanttChart />
 
-            {/* Playback toolbar */}
             <div className="flex items-center gap-1 border border-border rounded-md p-1 w-fit bg-muted/30">
               <Button size="sm" variant="ghost" onClick={playback.play} className="h-7 w-7 p-0">
                 <Play className="h-3.5 w-3.5" />
@@ -125,6 +121,19 @@ export default function Home() {
               <Button size="sm" variant="ghost" onClick={playback.restart} className="h-7 w-7 p-0">
                 <RotateCcw className="h-3.5 w-3.5" />
               </Button>
+              <div className="flex items-center gap-1 px-2 border-l border-border ml-1">
+                <span className="text-[10px] text-muted-foreground">Speed</span>
+                <select
+                  value={speed}
+                  onChange={e => setSpeed(Number(e.target.value))}
+                  className="h-6 text-[10px] bg-transparent border-none focus:outline-none"
+                >
+                  <option value={0.5}>0.5x</option>
+                  <option value={1}>1x</option>
+                  <option value={2}>2x</option>
+                  <option value={4}>4x</option>
+                </select>
+              </div>
             </div>
 
             <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-2">Metrics</div>
