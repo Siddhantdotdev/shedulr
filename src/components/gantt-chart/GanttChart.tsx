@@ -1,77 +1,80 @@
 "use client";
 import { useSimulationStore } from "@/store/simulation-store";
-import { useMemo } from "react";
 
 export function GanttChart() {
-  const { result, playbackIndex } = useSimulationStore();
+  const { result, playbackIndex, currentTime } = useSimulationStore();
 
   if (!result) {
     return (
-      <div className="h-32 flex items-center justify-center border border-border text-xs text-muted-foreground rounded-md">
-        Run simulation
+      <div className="h-40 flex items-center justify-center border border-border text-xs text-muted-foreground rounded-md">
+        Run a simulation to see the timeline
       </div>
     );
   }
 
-  const scale = 28;
-  const height = 64;
-  const width = Math.max(result.totalTime * scale + 40, 640);
+  const scale = 32;
+  const height = 72;
+  const width = Math.max(result.totalTime * scale + 48, 720);
 
   return (
-    <div className="overflow-x-auto border border-border rounded-md bg-background">
-      <svg width={width} height={height + 28} className="block">
-        {/* Time axis background */}
-        <rect x={0} y={height} width={width} height={28} fill="transparent" />
+    <div className="relative">
+      <div className="absolute top-2 right-3 text-xs text-muted-foreground font-mono z-10">
+        t = {currentTime ?? 0}
+      </div>
+      <div className="overflow-x-auto border border-border rounded-md bg-background">
+        <svg width={width} height={height + 32} className="block">
+          {result.segments.map((seg, i) => {
+            const x = seg.start * scale;
+            const w = Math.max((seg.end - seg.start) * scale, 3);
+            const isActive = playbackIndex < 0 || i <= playbackIndex;
+            const isCurrent = i === playbackIndex;
+            const isIdle = seg.pid === "idle";
 
-        {result.segments.map((seg, i) => {
-          const x = seg.start * scale;
-          const w = Math.max((seg.end - seg.start) * scale, 2);
-          const isActive = i <= playbackIndex;
-          const isCurrent = i === playbackIndex;
-
-          return (
-            <g key={i}>
-              <rect
-                x={x}
-                y={8}
-                width={w}
-                height={height - 16}
-                fill={seg.color}
-                opacity={playbackIndex < 0 || isActive ? 1 : 0.35}
-                stroke={isCurrent ? "#fff" : "transparent"}
-                strokeWidth={isCurrent ? 1.5 : 0}
-              />
-              {w > 18 && (
+            return (
+              <g key={i}>
+                <rect
+                  x={x}
+                  y={12}
+                  width={w}
+                  height={height - 20}
+                  fill={isIdle ? "#3f3f46" : seg.color}
+                  opacity={isActive ? 1 : 0.4}
+                  stroke={isCurrent ? "#fafafa" : isIdle ? "#52525b" : "transparent"}
+                  strokeWidth={isCurrent ? 2 : 0.5}
+                  rx={2}
+                />
+                {!isIdle && w > 22 && (
+                  <text
+                    x={x + w / 2}
+                    y={height / 2 + 2}
+                    textAnchor="middle"
+                    className="fill-white text-[12px] font-medium pointer-events-none"
+                    opacity={isActive ? 1 : 0.6}
+                  >
+                    {seg.pid}
+                  </text>
+                )}
                 <text
-                  x={x + w / 2}
-                  y={height / 2 + 4}
-                  textAnchor="middle"
-                  className="fill-white text-[11px] font-medium pointer-events-none"
-                  opacity={playbackIndex < 0 || isActive ? 1 : 0.5}
+                  x={x + 2}
+                  y={height + 20}
+                  className="fill-muted-foreground text-[10px] font-mono"
                 >
-                  {seg.pid}
+                  {seg.start}
                 </text>
-              )}
-              <text
-                x={x}
-                y={height + 18}
-                className="fill-muted-foreground text-[10px]"
-              >
-                {seg.start}
-              </text>
-              {i === result.segments.length - 1 && (
-                <text
-                  x={seg.end * scale}
-                  y={height + 18}
-                  className="fill-muted-foreground text-[10px]"
-                >
-                  {seg.end}
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
+                {i === result.segments.length - 1 && (
+                  <text
+                    x={seg.end * scale - 8}
+                    y={height + 20}
+                    className="fill-muted-foreground text-[10px] font-mono"
+                  >
+                    {seg.end}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
     </div>
   );
 }

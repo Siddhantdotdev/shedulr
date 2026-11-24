@@ -4,10 +4,11 @@ import { useEffect } from "react";
 import { useSimulationStore } from "@/store/simulation-store";
 
 export function usePlayback() {
-  const { result, playbackIndex, isPlaying, setPlaybackIndex, setIsPlaying } = useSimulationStore();
+  const { result, playbackIndex, isPlaying, speed, setPlaybackIndex, setIsPlaying, setCurrentTime } = useSimulationStore();
 
   useEffect(() => {
     if (!isPlaying || !result) return;
+    const delay = Math.max(150, 800 / speed);
     const id = setInterval(() => {
       setPlaybackIndex(prev => {
         const next = prev < 0 ? 0 : prev + 1;
@@ -15,11 +16,13 @@ export function usePlayback() {
           setIsPlaying(false);
           return result.segments.length - 1;
         }
+        const seg = result.segments[next];
+        if (seg) setCurrentTime(seg.start);
         return next;
       });
-    }, 700);
+    }, delay);
     return () => clearInterval(id);
-  }, [isPlaying, result, setPlaybackIndex, setIsPlaying]);
+  }, [isPlaying, result, speed, setPlaybackIndex, setIsPlaying, setCurrentTime]);
 
   return {
     play: () => {
@@ -42,6 +45,7 @@ export function usePlayback() {
     restart: () => {
       setPlaybackIndex(-1);
       setIsPlaying(false);
+      setCurrentTime(0);
     },
   };
 }
