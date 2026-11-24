@@ -10,23 +10,37 @@ export function usePlayback() {
     if (!isPlaying || !result) return;
     const id = setInterval(() => {
       setPlaybackIndex(prev => {
-        if (prev >= result.segments.length - 1) {
+        const next = prev < 0 ? 0 : prev + 1;
+        if (next >= result.segments.length) {
           setIsPlaying(false);
-          return prev;
+          return result.segments.length - 1;
         }
-        return prev + 1;
+        return next;
       });
-    }, 600);
+    }, 700);
     return () => clearInterval(id);
   }, [isPlaying, result, setPlaybackIndex, setIsPlaying]);
 
   return {
-    play: () => setIsPlaying(true),
+    play: () => {
+      if (!result) return;
+      if (playbackIndex < 0 || playbackIndex >= result.segments.length - 1) {
+        setPlaybackIndex(0);
+      }
+      setIsPlaying(true);
+    },
     pause: () => setIsPlaying(false),
-    stepForward: () => result && setPlaybackIndex(Math.min(playbackIndex + 1, result.segments.length - 1)),
-    stepBackward: () => setPlaybackIndex(Math.max(playbackIndex - 1, 0)),
+    stepForward: () => {
+      if (!result) return;
+      const next = playbackIndex < 0 ? 0 : Math.min(playbackIndex + 1, result.segments.length - 1);
+      setPlaybackIndex(next);
+    },
+    stepBackward: () => {
+      const next = playbackIndex <= 0 ? -1 : playbackIndex - 1;
+      setPlaybackIndex(next);
+    },
     restart: () => {
-      setPlaybackIndex(0);
+      setPlaybackIndex(-1);
       setIsPlaying(false);
     },
   };

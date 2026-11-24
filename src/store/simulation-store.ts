@@ -42,7 +42,8 @@ export const useSimulationStore = create<State>((set, get) => ({
   run: () => {
     try {
       const result = simulate(get().processes, { algorithm: get().algorithm, quantum: get().quantum });
-      set({ result, playbackIndex: 0, isPlaying: false });
+      // Show full chart immediately; playbackIndex -1 means "all visible"
+      set({ result, playbackIndex: -1, isPlaying: false });
     } catch (e) {
       console.error(e);
     }
